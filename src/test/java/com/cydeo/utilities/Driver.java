@@ -41,11 +41,13 @@ import java.time.Duration;
                         //WebDriverManager.chromedriver().setup();
                         driverPool.set(new ChromeDriver());
                         driverPool.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+                        driverPool.get().manage().window().maximize();
                         break;
                     case "firefox":
                         //WebDriverManager.firefoxdriver().setup();
                         driverPool.set(new FirefoxDriver());
                         driverPool.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+                        driverPool.get().manage().window().maximize();
                         break;
                 }
 
