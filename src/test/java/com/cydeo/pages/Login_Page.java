@@ -1,5 +1,6 @@
 package com.cydeo.pages;
 
+import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -15,4 +16,8 @@ public class Login_Page {
     public WebElement passwordInput;
     @FindBy (className = "login-btn")
     public WebElement loginButton;
+
+
+
+
 }

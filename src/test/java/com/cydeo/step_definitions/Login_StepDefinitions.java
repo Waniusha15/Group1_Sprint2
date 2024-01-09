@@ -30,8 +30,8 @@ public class Login_StepDefinitions {
             loginPage.loginButton.click();
         }
     }
-    @Then("user should land on Home page with {string} in title")
-    public void user_should_land_on_home_page_with_in_title(String keyWordInTitle) {
-        BrowserUtils.verifyTitleContains(keyWordInTitle);
+    @Then("user should land on Home page")
+    public void user_should_land_on_home_page_with_in_title() {
+        BrowserUtils.verifyURLContains("login=yes");
     }
 }
