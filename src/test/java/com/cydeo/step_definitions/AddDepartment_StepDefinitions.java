@@ -105,7 +105,7 @@ public class AddDepartment_StepDefinitions {
     @And("user should not see ADD DEPARTMENT button")
     public void userShouldNotSeeADDDEPARTMENTButton() {
 
-        employeePage.addDepartmentButton.isDisplayed();
+        BrowserUtils.verifyElementNotDisplayed(By.xpath("//a[contains(@class,'webform-small-button-add')]"));
 
 
     }
