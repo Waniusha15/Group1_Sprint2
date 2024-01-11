@@ -1,9 +1,7 @@
 package com.cydeo.step_definitions;
 
-import com.cydeo.pages.Dashboard_Page;
+import com.cydeo.pages.Activity_St_Page;
 import com.cydeo.utilities.BrowserUtils;
-import com.cydeo.utilities.Driver;
-import com.fasterxml.jackson.core.JsonPointer;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
@@ -12,10 +10,10 @@ import org.openqa.selenium.WebElement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Dashboard_Step_Definitions {
+public class Activity_St_Page_Definitions {
 
 
-    Dashboard_Page dashboard_page = new Dashboard_Page();
+    Activity_St_Page dashboard_page = new Activity_St_Page();
 
     /*
     @Then("user should able to see Message option")

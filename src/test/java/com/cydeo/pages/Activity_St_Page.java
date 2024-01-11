@@ -7,11 +7,11 @@ import org.openqa.selenium.support.PageFactory;
 
 import java.util.List;
 
-public class Dashboard_Page {
+public class Activity_St_Page {
 
 
 
-    public Dashboard_Page(){
+    public Activity_St_Page(){
 
         PageFactory.initElements(Driver.getDriver(),this);
     }
