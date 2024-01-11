@@ -1,7 +1,9 @@
 package com.cydeo.step_definitions;
 
 import com.cydeo.pages.Stream_Page;
+import com.cydeo.utilities.BrowserUtils;
 import com.cydeo.utilities.CRM_Utils;
+import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -14,6 +16,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UploadAsMessage_StepDefinitions {
@@ -50,15 +54,15 @@ public class UploadAsMessage_StepDefinitions {
         fileExtension = fileExtension.trim();
         String path;
         if (fileExtension.equals(".pdf"))
-            path = "C:\\Users\\Roman\\Desktop\\Cydeo\\Sprint2\\TestPDF.pdf";
+            path = ConfigurationReader.getProperty("pdfFilePath");
         else if (fileExtension.equals(".txt"))
-            path = "C:\\Users\\Roman\\Desktop\\Cydeo\\Sprint2\\TestTXT.txt";
+            path = ConfigurationReader.getProperty("txtFilePath");
         else if (fileExtension.equals(".jpeg"))
-            path = "C:\\Users\\Roman\\Desktop\\Cydeo\\Sprint2\\TestJPEG.jpeg";
+            path = ConfigurationReader.getProperty("jpegFilePath");
         else if (fileExtension.equals(".png"))
-            path = "C:\\Users\\Roman\\Desktop\\Cydeo\\Sprint2\\TestPNG.png";
+            path = ConfigurationReader.getProperty("pngFilePath");
         else if (fileExtension.equals(".docx"))
-            path = "C:\\Users\\Roman\\Desktop\\Cydeo\\Sprint2\\TestDOCX.docx";
+            path = ConfigurationReader.getProperty("docxFilePath");
         else
             throw new IllegalArgumentException();
 
@@ -85,32 +89,27 @@ public class UploadAsMessage_StepDefinitions {
 
     @Then("user see feed-post with attached {string}")
     public void userSeeFeedPostWithAttached(String fileExtension) {
-        String fileName = "Test" + fileExtension.substring(1).toUpperCase();
-
         var streamPage = new Stream_Page();
-
         WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
         wait.until(ExpectedConditions.presenceOfElementLocated(streamPage.getFirstPostLocator()));
 
-        boolean isAttached = false;
         List<WebElement> listOfUploadedFiles;
-        if (fileExtension.equals(".docx") ||
-            fileExtension.equals(".pdf") ||
-            fileExtension.equals(".txt")) {
+        if (!CRM_Utils.fileIsPicture(fileExtension)) {
             listOfUploadedFiles = streamPage.getNewestPostFiles();
         }
-        else if (fileExtension.equals(".jpeg") || fileExtension.equals(".png"))
+        else if (CRM_Utils.fileIsPicture(fileExtension))
             listOfUploadedFiles = streamPage.getNewestPostPhotos();
         else
             throw new IllegalArgumentException();
 
+        boolean isAttached = false;
         for (WebElement uploadedFile : listOfUploadedFiles) {
             //in case of attached files
-            if (uploadedFile.getText().contains(fileName))
+            if (uploadedFile.getText().contains(fileExtension))
                 isAttached = true;
 
             //in case of attached pictures
-            if (uploadedFile.getAttribute("data-bx-title").contains(fileName))
+            if (uploadedFile.getAttribute("data-bx-title").contains(fileExtension))
                 isAttached = true;
         }
 
@@ -160,14 +159,19 @@ public class UploadAsMessage_StepDefinitions {
 
     @And("user see feed-post with attached {string} in text of message")
     public void userSeeFeedPostWithAttachedInTestOfMessage(String fileExtension) {
+        var streamPage = new Stream_Page();
         String uploadedFileInTextName;
         if (!CRM_Utils.fileIsPicture(fileExtension)) {
-            uploadedFileInTextName = Driver.getDriver().findElement(
-                    By.xpath("(//div[@class='feed-post-text-block-inner-inner'])[1]/a")).getText();
+            uploadedFileInTextName = streamPage.
+                                    getUploadedFilesInNewestPostText().
+                                    get(0).
+                                    getText();
         }
         else if (CRM_Utils.fileIsPicture(fileExtension))
-            uploadedFileInTextName = Driver.getDriver().findElement(
-                    By.xpath("(//div[@class='feed-post-text-block-inner-inner'])[1]/div//img")).getAttribute("data-bx-title");
+            uploadedFileInTextName = streamPage.
+                                    getUploadedImagesInNewestPostText().
+                                    get(0).
+                                    getAttribute("data-bx-title");
         else
             throw new IllegalArgumentException();
 
@@ -178,5 +182,78 @@ public class UploadAsMessage_StepDefinitions {
     public void userSeeNoFilesAttachedToTheMessage() {
         var streamPage = new Stream_Page();
         Assert.assertTrue(streamPage.getUploadedFiles().isEmpty());
+    }
+
+    @When("user upload multiple files simultaneously")
+    public void userUploadMultipleFilesSimultaneously() {
+        var streamPage = new Stream_Page();
+        streamPage.uploadFile("TestTXT.txt");
+        streamPage.uploadFile("TestPDF.pdf");
+        streamPage.uploadFile("TestDOCX.docx");
+        streamPage.uploadFile("TestJPEG.jpeg");
+        streamPage.uploadFile("TestPNG.png");
+
+    }
+
+    @Then("user see simultaneously uploaded files in list of attached files")
+    public void userSeeSimultaneouslyUploadedFilesInListOfAttachedFiles() {
+        var streamPage = new Stream_Page();
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(5));
+
+        int filesToBeLoaded = streamPage.getListOfUploadedExtensions().size();
+        wait.until(ExpectedConditions.numberOfElementsToBe(streamPage.getUploadedFilesStatusLocator(), filesToBeLoaded));
+
+        int uploadedFiles = streamPage.getUploadedFilesStatus().size();
+        Assert.assertEquals(filesToBeLoaded, uploadedFiles);
+    }
+
+    @And("user see simultaneously uploaded files in text area")
+    public void userSeeSimultaneouslyUploadedFilesInTextArea() {
+        var streamPage = new Stream_Page();
+        Driver.getDriver().switchTo().frame(streamPage.getNewMessageFrame());
+
+        //to wait pictures to be loaded
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
+
+        BrowserUtils.sleep(2);
+
+        var listOfExtensions = streamPage.getListOfUploadedExtensions();
+        var listOfFiles = Driver.getDriver().findElements(By.xpath("//span[contains(@id, 'bx')]"));
+        var listOfImages = Driver.getDriver().findElements(By.tagName("img"));
+
+        boolean allFilesInText = streamPage.allFilesAreInMessageText(listOfExtensions, listOfFiles, listOfImages);
+
+        //checking if lists are empty to ensure we don't have anything in text which we didn't upload
+        Assert.assertTrue(allFilesInText);
+
+        Driver.getDriver().switchTo().defaultContent();
+    }
+
+    @Then("user see feed-post with simultaneously uploaded files {string}")
+    public void userSeeFeedPostWithSimultaneouslyUploadedFilesAttached(String inAttachmentsOfText) {
+        var streamPage = new Stream_Page();
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.presenceOfElementLocated(streamPage.getFirstPostLocator()));
+
+        List<String> listOfExtension = streamPage.getListOfUploadedExtensions();
+        List<WebElement> listOfUploadedFiles;
+        List<WebElement> listOfUploadedImages;
+
+        if (inAttachmentsOfText.equals("in attachments")) {
+            listOfUploadedFiles = streamPage.getNewestPostFiles();
+            listOfUploadedImages = streamPage.getNewestPostPhotos();
+        }
+        else if (inAttachmentsOfText.equals("in text")) {
+            listOfUploadedFiles = streamPage.getUploadedFilesInNewestPostText();
+            listOfUploadedImages = streamPage.getUploadedImagesInNewestPostText();
+        }
+        else
+            throw new IllegalArgumentException();
+
+        BrowserUtils.sleep(2);
+
+        boolean areAttached = streamPage.allFilesAreInMessageText(listOfExtension, listOfUploadedFiles, listOfUploadedImages);
+
+        Assert.assertTrue(areAttached);
     }
 }
