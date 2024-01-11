@@ -5,6 +5,7 @@ import com.cydeo.pages.MyProfile_Page;
 import com.cydeo.pages.ProfileIcon_Page;
 import com.cydeo.utilities.BrowserUtils;
 import com.cydeo.utilities.Driver;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
@@ -55,4 +56,10 @@ public class MyPage_StepDefinitions {
         }
     }
 
+    @And("email under the General tab should be same as login mail {string}")
+    public void emailUnderTheGeneralTabShouldBeSameAsLoginMail(String expectedUserName) {
+        WebElement actualUserName = Driver.getDriver().findElement(By.id("user-name"));
+        Assert.assertEquals(expectedUserName,actualUserName.getText());
+
+    }
 }
