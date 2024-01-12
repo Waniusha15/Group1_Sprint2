@@ -1,5 +1,6 @@
 package com.cydeo.pages;
 
+import com.cydeo.utilities.CRM_Utils;
 import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import org.openqa.selenium.By;
@@ -88,7 +89,6 @@ public class Stream_Page {
             throw new IllegalArgumentException();
     }
 
-
     public List<WebElement> getUploadedFiles() {
         return uploadedFiles;
     }
@@ -156,34 +156,34 @@ public class Stream_Page {
                                             List<WebElement> listOfUploadedImages) {
 
         //counting matching extensions
-        int extensions = 0;
-        int files = 0;
-        int images = 0;
+        int extensionsMatching = 0;
+        int filesMatching = 0;
+        int imagesMatching = 0;
 
         for (String extension : listOfExtensions) {
             //to check if files contains extension
             for (WebElement file : listOfUploadedFiles) {
                 if (file.getText().contains(extension)) {
-                    extensions++;
-                    files++;
+                    extensionsMatching++;
+                    filesMatching++;
                 }
             }
 
-            //to check if images contains extension: if yes - remove from list, if no - test will fail
+            //to check if images contains extension: if yes - increment counters. Test will fail if counters are not matching with quantity of files
             for (WebElement image : listOfUploadedImages) {
                 //second attribute for posted message
                 if (image.getAttribute("src").contains(extension) ||
                     (image.getAttribute("data-bx-title") != null &&
                         image.getAttribute("data-bx-title").contains(extension))) {
-                    extensions++;
-                    images++;
+                    extensionsMatching++;
+                    imagesMatching++;
                 }
             }
         }
 
-        return listOfExtensions.size() == extensions &&
-                listOfUploadedFiles.size() == files &&
-                listOfUploadedImages.size() == images;
+        return listOfExtensions.size() == extensionsMatching &&
+                listOfUploadedFiles.size() == filesMatching &&
+                listOfUploadedImages.size() == imagesMatching;
     }
 
     public List<WebElement> getUploadedFilesInNewestPostText() {
@@ -201,5 +201,46 @@ public class Stream_Page {
     public void uploadFile(String fileName) {
         var path = System.getProperty("user.dir") + "\\" + ConfigurationReader.getProperty(fileName);
         uploadOrDragFileInput.sendKeys(path);
+    }
+
+    public String getUploadFilePath(String fileExtension) {
+        if (fileExtension.contains(".pdf"))
+            return ConfigurationReader.getProperty("TestPDF.pdf");
+        else if (fileExtension.contains(".txt"))
+            return ConfigurationReader.getProperty("TestTXT.txt");
+        else if (fileExtension.contains(".jpeg"))
+            return ConfigurationReader.getProperty("TestJPEG.jpeg");
+        else if (fileExtension.contains(".png"))
+            return ConfigurationReader.getProperty("TestPNG.png");
+        else if (fileExtension.contains(".docx"))
+            return ConfigurationReader.getProperty("TestDOCX.docx");
+        else
+            throw new IllegalArgumentException();
+    }
+
+    public boolean fileIsPicture(String fileExtension) {
+        if (fileExtension.equals(".docx") ||
+                fileExtension.equals(".pdf") ||
+                fileExtension.equals(".txt")) {
+            return false;
+        }
+        else if (fileExtension.equals(".jpeg") || fileExtension.equals(".png"))
+            return true;
+        else
+            throw new IllegalArgumentException();
+    }
+
+    public List<WebElement> getLisOfUploadedFiles(String fileExtension) {
+        if (!fileIsPicture(fileExtension)) {
+            return getNewestPostFiles();
+        }
+        else if (fileIsPicture(fileExtension))
+            return getNewestPostPhotos();
+        else
+            throw new IllegalArgumentException();
+    }
+
+    public String getFileNameFromExtension(String fileExtension) {
+        return "Test" + fileExtension.substring(1).toUpperCase() + fileExtension;
     }
 }

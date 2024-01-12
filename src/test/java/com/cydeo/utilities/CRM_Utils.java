@@ -1,7 +1,11 @@
 package com.cydeo.utilities;
 
 import com.cydeo.pages.Login_Page;
+import com.cydeo.pages.Stream_Page;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 public class CRM_Utils {
     public static void login(String user) {
@@ -22,17 +26,5 @@ public class CRM_Utils {
         pom.loginInput.sendKeys(loginEmail);
         pom.passwordInput.sendKeys(password);
         pom.loginButton.click();
-    }
-
-    public static boolean fileIsPicture(String fileExtension) {
-        if (fileExtension.equals(".docx") ||
-                fileExtension.equals(".pdf") ||
-                fileExtension.equals(".txt")) {
-            return false;
-        }
-        else if (fileExtension.equals(".jpeg") || fileExtension.equals(".png"))
-            return true;
-        else
-            throw new IllegalArgumentException();
     }
 }
