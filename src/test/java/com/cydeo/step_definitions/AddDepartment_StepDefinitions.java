@@ -1,24 +1,24 @@
 package com.cydeo.step_definitions;
 
-import com.cydeo.pages.EmployeePage;
+import com.cydeo.pages.EmployeesPage;
 import com.cydeo.pages.Login_Page;
 import com.cydeo.utilities.BrowserUtils;
 import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+import java.util.List;
+
 public class AddDepartment_StepDefinitions {
 
     Login_Page loginPage = new Login_Page();
-    EmployeePage employeePage = new EmployeePage();
+    EmployeesPage employeePage = new EmployeesPage();
     @When("user logs in as {string}")
     public void user_logs_in_as(String userType) {
 
@@ -40,19 +40,17 @@ public class AddDepartment_StepDefinitions {
     @When("clicks to Employees button")
     public void clicks_to_employees_button() {
 
-        WebElement employeeButton = Driver.getDriver().findElement(By.xpath("(//span[@data-role='item-text'])[10]"));
+        WebElement employeesButton = Driver.getDriver().findElement(By.xpath("//li[@data-id='menu_company']"));
+        employeesButton.click();
 
-        employeeButton.click();
 
     }
     @Then("user should see {string} page")
-    public void user_should_see_page(String string) {
+    public void user_should_see_page(String expectedTitle) {
 
-        BrowserUtils.verifyTitleContains("Company Structure");
+        BrowserUtils.verifyTitleContains(expectedTitle);
 
     }
-
-
 
 
     @When("user logs in as hr")
@@ -110,3 +108,9 @@ public class AddDepartment_StepDefinitions {
 
     }
 }
+//    List< WebElement > employeeButton = Driver.getDriver().findElements(By.xpath("//span[@class='menu-item-link-text']"));
+//        for (WebElement webElement : employeeButton) {
+//                if(webElement.getText().equals("Employees")){
+//                webElement.click();
+//                }
+//                }
