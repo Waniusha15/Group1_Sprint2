@@ -1,11 +1,15 @@
 package com.cydeo.pages;
 
+import com.cydeo.utilities.CRM_Utils;
+import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Stream_Page {
@@ -48,16 +52,27 @@ public class Stream_Page {
 
     @FindBy(xpath = "(//div[@class='feed-item-wrap'])[1]")
     private WebElement firstPost;
-    By firstPostLocator = By.xpath("(//div[@class='feed-item-wrap'])[1]");
+    private By firstPostLocator = By.xpath("(//div[@class='feed-item-wrap'])[1]");
 
     @FindBy(xpath = "//span[contains(@id, 'check-in-text')]/span")
     private List<WebElement> uploadedFilesStatus;
+    private By uploadedFilesStatusLocator = By.xpath("//span[contains(@id, 'check-in-text')]/span");
 
     @FindBy(xpath = "//iframe[@class='bx-editor-iframe']")
     private WebElement newMessageFrame;
 
     @FindBy(xpath = "//span[@class='del-but']")
     private WebElement deleteUploadedFileButton;
+
+    @FindBy(xpath = "//span[@class='feed-add-post-loading']")
+    private List<WebElement> fileUploadLoadingBars;
+    private By fileUploadLoadingBarsLocator = By.xpath("//span[@class='feed-add-post-loading']");
+
+    @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]/a")
+    private List<WebElement> uploadedFilesInNewestPostText;
+
+    @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]/div//img")
+    private List<WebElement> uploadedImagesInNewestPostText;
 
     public WebElement getButton(String button) {
         if (button.equals("message"))
@@ -73,7 +88,6 @@ public class Stream_Page {
         else
             throw new IllegalArgumentException();
     }
-
 
     public List<WebElement> getUploadedFiles() {
         return uploadedFiles;
@@ -121,5 +135,112 @@ public class Stream_Page {
 
     public WebElement getDeleteUploadedFileButton() {
         return deleteUploadedFileButton;
+    }
+
+    public List<WebElement> getFileUploadLoadingBars() {
+        return fileUploadLoadingBars;
+    }
+
+    public By getFileUploadLoadingBarsLocator() {
+        return fileUploadLoadingBarsLocator;
+    }
+
+    public List<String> getListOfUploadedExtensions() {
+        var arrayOfExtension = ConfigurationReader.getProperty("uploadedFilesExtensions").split(",");
+        return Arrays.asList(arrayOfExtension);
+    }
+
+    //returns true if all extensions are in lists, and nothing else are in the lists
+    public boolean allFilesAreInMessageText(List<String> listOfExtensions,
+                                            List<WebElement> listOfUploadedFiles,
+                                            List<WebElement> listOfUploadedImages) {
+
+        //counting matching extensions
+        int extensionsMatching = 0;
+        int filesMatching = 0;
+        int imagesMatching = 0;
+
+        for (String extension : listOfExtensions) {
+            //to check if files contains extension
+            for (WebElement file : listOfUploadedFiles) {
+                if (file.getText().contains(extension)) {
+                    extensionsMatching++;
+                    filesMatching++;
+                }
+            }
+
+            //to check if images contains extension: if yes - increment counters. Test will fail if counters are not matching with quantity of files
+            for (WebElement image : listOfUploadedImages) {
+                //second attribute for posted message
+                if (image.getAttribute("src").contains(extension) ||
+                    (image.getAttribute("data-bx-title") != null &&
+                        image.getAttribute("data-bx-title").contains(extension))) {
+                    extensionsMatching++;
+                    imagesMatching++;
+                }
+            }
+        }
+
+        return listOfExtensions.size() == extensionsMatching &&
+                listOfUploadedFiles.size() == filesMatching &&
+                listOfUploadedImages.size() == imagesMatching;
+    }
+
+    public List<WebElement> getUploadedFilesInNewestPostText() {
+        return uploadedFilesInNewestPostText;
+    }
+
+    public List<WebElement> getUploadedImagesInNewestPostText() {
+        return uploadedImagesInNewestPostText;
+    }
+
+    public By getUploadedFilesStatusLocator() {
+        return uploadedFilesStatusLocator;
+    }
+
+    public void uploadFile(String fileName) {
+        var path = System.getProperty("user.dir") + "\\" + ConfigurationReader.getProperty(fileName);
+        uploadOrDragFileInput.sendKeys(path);
+    }
+
+    public String getUploadFilePath(String fileExtension) {
+        if (fileExtension.contains(".pdf"))
+            return ConfigurationReader.getProperty("TestPDF.pdf");
+        else if (fileExtension.contains(".txt"))
+            return ConfigurationReader.getProperty("TestTXT.txt");
+        else if (fileExtension.contains(".jpeg"))
+            return ConfigurationReader.getProperty("TestJPEG.jpeg");
+        else if (fileExtension.contains(".png"))
+            return ConfigurationReader.getProperty("TestPNG.png");
+        else if (fileExtension.contains(".docx"))
+            return ConfigurationReader.getProperty("TestDOCX.docx");
+        else
+            throw new IllegalArgumentException();
+    }
+
+    public boolean fileIsPicture(String fileExtension) {
+        if (fileExtension.equals(".docx") ||
+                fileExtension.equals(".pdf") ||
+                fileExtension.equals(".txt")) {
+            return false;
+        }
+        else if (fileExtension.equals(".jpeg") || fileExtension.equals(".png"))
+            return true;
+        else
+            throw new IllegalArgumentException();
+    }
+
+    public List<WebElement> getLisOfUploadedFiles(String fileExtension) {
+        if (!fileIsPicture(fileExtension)) {
+            return getNewestPostFiles();
+        }
+        else if (fileIsPicture(fileExtension))
+            return getNewestPostPhotos();
+        else
+            throw new IllegalArgumentException();
+    }
+
+    public String getFileNameFromExtension(String fileExtension) {
+        return "Test" + fileExtension.substring(1).toUpperCase() + fileExtension;
     }
 }
