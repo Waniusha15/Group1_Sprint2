@@ -26,17 +26,17 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
     Then user see "upload_file" button is visible
     When user on stream page click "upload_file" button
     Then user see "upload_or_drag_file" button is visible
-    When user upload "<file>"
-    Then user see "<file>" in list of attached files
+    When user upload "<files>"
+    Then user see "<files>" in list of attached files
     When user on stream page click on uploaded file
     Then user see uploaded file status changed to In text
-    And user see uploaded "<file>" in text area
+    And user see uploaded "<files>" in text area
     When user on stream page click "send" button
-    Then user see feed-post with attached "<file>"
-    And user see feed-post with attached "<file>" in text of message
+    Then user see feed-post with attached "<files>"
+    And user see feed-post with attached "<files>" in text of message
 
     Examples:
-      | file  |
+      | files |
       | .pdf  |
       | .txt  |
       | .jpeg |
