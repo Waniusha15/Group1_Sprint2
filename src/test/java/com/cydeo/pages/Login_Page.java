@@ -15,4 +15,10 @@ public class Login_Page {
     public WebElement passwordInput;
     @FindBy (className = "login-btn")
     public WebElement loginButton;
+    @FindBy(xpath = "//div[.='Incorrect login or password']")
+    public WebElement errorMessage;
+    @FindBy(className = "login-item-checkbox-label")
+    public WebElement rememberMe_text;
+    @FindBy(id = "USER_REMEMBER")
+    public WebElement rememberMe_checkbox;
 }
