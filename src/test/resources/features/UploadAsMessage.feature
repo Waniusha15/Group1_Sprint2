@@ -67,6 +67,7 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
       | .docx |
 
 
+    @Rerun
     Scenario: Verify that user can upload multiple files simultaneously (.pdf, .txt, .jpeg, .png, .docx.)
               #loading files simultaneously
 

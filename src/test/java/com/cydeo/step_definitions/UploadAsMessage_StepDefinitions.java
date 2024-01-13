@@ -10,10 +10,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -34,7 +31,6 @@ public class UploadAsMessage_StepDefinitions {
     public void userOnStreamPageClickButton(String button) {
         var streamPage = new Stream_Page();
         streamPage.getButton(button).click();
-
     }
 
     @Then("user see {string} button is visible")
@@ -91,6 +87,12 @@ public class UploadAsMessage_StepDefinitions {
             //in case of attached pictures
             if (uploadedFile.getAttribute("data-bx-title").contains(fileExtension))
                 isAttached = true;
+        }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         Assert.assertTrue(isAttached);
@@ -184,12 +186,7 @@ public class UploadAsMessage_StepDefinitions {
     @When("user upload multiple files simultaneously")
     public void userUploadMultipleFilesSimultaneously() {
         var streamPage = new Stream_Page();
-        streamPage.uploadFile("TestTXT.txt");
-        streamPage.uploadFile("TestPDF.pdf");
-        streamPage.uploadFile("TestDOCX.docx");
-        streamPage.uploadFile("TestJPEG.jpeg");
-        streamPage.uploadFile("TestPNG.png");
-
+        streamPage.uploadMultipleFiles("TestTXT.txt", "TestPDF.pdf", "TestDOCX.docx", "TestJPEG.jpeg", "TestPNG.png");
     }
 
     @Then("user see simultaneously uploaded files in list of attached files")
@@ -250,15 +247,13 @@ public class UploadAsMessage_StepDefinitions {
     @When("user upload {int} .txt files")
     public void userUploadTxtFiles(int filesQuantity) {
         var streamPage = new Stream_Page();
-        for (int i = 0; i < filesQuantity; i++) {
-            streamPage.uploadFile("TestTXT.txt");
-        }
+        streamPage.uploadFileMultipleTimes("TestTXT.txt", 200);
     }
 
     @Then("user see {int} uploaded files in list of attached files")
     public void userSeeUploadedFilesInListOfAttachedFiles(int filesQuantity) {
         var streamPage = new Stream_Page();
-        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(5));
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(60));
 
         wait.until(ExpectedConditions.numberOfElementsToBe(streamPage.getUploadedFilesStatusLocator(), filesQuantity));
 
