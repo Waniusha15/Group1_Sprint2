@@ -1,6 +1,6 @@
 package com.cydeo.pages;
 
-import com.cydeo.utilities.CRM_Utils;
+import com.cydeo.utilities.BrowserUtils;
 import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import org.openqa.selenium.By;
@@ -8,7 +8,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,8 +23,18 @@ public class Stream_Page {
     @FindBy(id = "bx-b-uploadfile-blogPostForm")
     private WebElement uploadFileButton;
 
-    @FindBy(xpath = "//div[contains(@id, 'diskuf-selectdialog')]//td[1]//input")
+    @FindBy(xpath = "//div[@style='display: block; opacity: 1;']//input[@multiple='multiple']")
     private WebElement uploadOrDragFileInput;
+    By uploadOrDragFileInputLocator = By.xpath("//div[@style='display: block; opacity: 1;']//input[@multiple='multiple']");
+
+    private WebElement locateUploadOrDragFileInput() {
+        /*WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.presenceOfElementLocated(uploadOrDragFileInputLocator));
+        JavascriptExecutor js = (JavascriptExecutor) Driver.getDriver();*/
+
+        return Driver.getDriver().findElement(uploadOrDragFileInputLocator);
+        /*js.executeScript("arguments[0].scrollIntoView();", uploadOrDragFileInput);*/
+    }
 
     @FindBy(id = "blog-submit-button-save")
     private WebElement sendMessageButton;
@@ -54,7 +63,7 @@ public class Stream_Page {
     private WebElement firstPost;
     private By firstPostLocator = By.xpath("(//div[@class='feed-item-wrap'])[1]");
 
-    @FindBy(xpath = "//span[contains(@id, 'check-in-text')]/span")
+    @FindBy(xpath = "//span[contains(@id, 'check-in-text')]")
     private List<WebElement> uploadedFilesStatus;
     private By uploadedFilesStatusLocator = By.xpath("//span[contains(@id, 'check-in-text')]/span");
 
@@ -68,10 +77,10 @@ public class Stream_Page {
     private List<WebElement> fileUploadLoadingBars;
     private By fileUploadLoadingBarsLocator = By.xpath("//span[@class='feed-add-post-loading']");
 
-    @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]/a")
+    @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]//a")
     private List<WebElement> uploadedFilesInNewestPostText;
 
-    @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]/div//img")
+    @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]//div//img")
     private List<WebElement> uploadedImagesInNewestPostText;
 
     public WebElement getButton(String button) {
@@ -199,8 +208,10 @@ public class Stream_Page {
     }
 
     public void uploadFile(String fileName) {
+        BrowserUtils.sleep(1);
+
         var path = System.getProperty("user.dir") + "\\" + ConfigurationReader.getProperty(fileName);
-        uploadOrDragFileInput.sendKeys(path);
+        locateUploadOrDragFileInput().sendKeys(path);
     }
 
     public String getUploadFilePath(String fileExtension) {
@@ -242,5 +253,28 @@ public class Stream_Page {
 
     public String getFileNameFromExtension(String fileExtension) {
         return "Test" + fileExtension.substring(1).toUpperCase() + fileExtension;
+    }
+
+    public void uploadMultipleFiles(String... fileNames) {
+        String path = "";
+        for (String fileName : fileNames) {
+            path += System.getProperty("user.dir") + "\\" + ConfigurationReader.getProperty(fileName) + "\n";
+        }
+
+        //we need to cut last \n (newline char) - which is considered as one character
+        path = path.substring(0, path.length()-1);
+
+
+        uploadOrDragFileInput.sendKeys(path);
+    }
+
+    public void uploadFileMultipleTimes(String fileName, int quantity) {
+        String path = "";
+        for (int i = 0; i < quantity; i++) {
+            path += System.getProperty("user.dir") + "\\" + ConfigurationReader.getProperty(fileName) + "\n";
+        }
+
+        path = path.substring(0, path.length()-1);
+        uploadOrDragFileInput.sendKeys(path);
     }
 }
