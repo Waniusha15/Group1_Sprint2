@@ -66,8 +66,8 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
       | .png  |
       | .docx |
 
-    @test
-    Scenario: user can upload multiple files simultaneously (.pdf, .txt, .jpeg, .png, .docx.)
+
+    Scenario: Verify that user can upload multiple files simultaneously (.pdf, .txt, .jpeg, .png, .docx.)
               #loading files simultaneously
 
       When user on stream page click "message" button
@@ -82,4 +82,22 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
       When user on stream page click "send" button
       Then user see feed-post with simultaneously uploaded files "in attachments"
       And user see feed-post with simultaneously uploaded files "in text"
+
+  @test
+    Scenario: User loading 200 .txt files
+              #loading files simultaneously
+
+      When user on stream page click "message" button
+      Then user see "upload_file" button is visible
+      When user on stream page click "upload_file" button
+      Then user see "upload_or_drag_file" button is visible
+      When user upload 200 .txt files
+      Then user see 200 uploaded files in list of attached files
+      When user on stream page click on uploaded file
+      Then user see uploaded file status changed to In text
+      And user see 200 uploaded .txt files in text area
+      When user on stream page click "send" button
+      Then user see feed-post with 200 uploaded .txt files "in attachments"
+      And user see feed-post with 200 uploaded .txt files "in text"
+
 

@@ -11,7 +11,10 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -96,16 +99,32 @@ public class UploadAsMessage_StepDefinitions {
     @When("user on stream page click on uploaded file")
     public void userOnStreamPageClickOnUploadedFile() {
         var streamPage = new Stream_Page();
+        Actions actions = new Actions(Driver.getDriver());
         for (WebElement uploadedFile : streamPage.getUploadedFiles()) {
+            actions.moveToElement(uploadedFile);
             uploadedFile.click();
         }
+
+        var messageButton = streamPage.getButton("message");
+        JavascriptExecutor js = (JavascriptExecutor) Driver.getDriver();
+        js.executeScript("arguments[0].scrollIntoView();", messageButton);
+
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.visibilityOf(messageButton));
     }
 
     @Then("user see uploaded file status changed to In text")
     public void userSeeFileIsInTextInputField() {
         var streamPage = new Stream_Page();
         boolean isInText = true;
-        for (WebElement uploadedFilesStatus : streamPage.getUploadedFilesStatus()) {
+        JavascriptExecutor js = (JavascriptExecutor) Driver.getDriver();
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(1));
+
+        var uploadedFilesStatuses = streamPage.getUploadedFilesStatus();
+        for (WebElement uploadedFilesStatus : uploadedFilesStatuses) {
+            wait.until(ExpectedConditions.visibilityOf(uploadedFilesStatus));
+            js.executeScript("arguments[0].scrollIntoView();", uploadedFilesStatus);
+
             if (uploadedFilesStatus.getText().equals("Insert in text"))
                 isInText = false;
         }
@@ -226,5 +245,54 @@ public class UploadAsMessage_StepDefinitions {
         boolean areAttached = streamPage.allFilesAreInMessageText(listOfExtension, listOfUploadedFiles, listOfUploadedImages);
 
         Assert.assertTrue(areAttached);
+    }
+
+    @When("user upload {int} .txt files")
+    public void userUploadTxtFiles(int filesQuantity) {
+        var streamPage = new Stream_Page();
+        for (int i = 0; i < filesQuantity; i++) {
+            streamPage.uploadFile("TestTXT.txt");
+        }
+    }
+
+    @Then("user see {int} uploaded files in list of attached files")
+    public void userSeeUploadedFilesInListOfAttachedFiles(int filesQuantity) {
+        var streamPage = new Stream_Page();
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(5));
+
+        wait.until(ExpectedConditions.numberOfElementsToBe(streamPage.getUploadedFilesStatusLocator(), filesQuantity));
+
+        int uploadedFiles = streamPage.getUploadedFilesStatus().size();
+        Assert.assertEquals(filesQuantity, uploadedFiles);
+    }
+
+    @And("user see {int} uploaded .txt files in text area")
+    public void userSeeUploadedTxtFilesInTextArea(int filesQuantity) {
+        var streamPage = new Stream_Page();
+
+        Driver.getDriver().switchTo().frame(streamPage.getNewMessageFrame());
+        var listOfFiles = Driver.getDriver().findElements(By.xpath("//span[contains(@id, 'bx')]"));
+
+        Assert.assertEquals(filesQuantity, listOfFiles.size());
+
+        Driver.getDriver().switchTo().defaultContent();
+    }
+
+    @Then("user see feed-post with {int} uploaded .txt files {string}")
+    public void userSeeFeedPostWithUploadedTxtFiles(int filesQuantity, String inAttachmentsOrText) {
+        var streamPage = new Stream_Page();
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.presenceOfElementLocated(streamPage.getFirstPostLocator()));
+
+        List<WebElement> listOfUploadedFiles;
+
+        if (inAttachmentsOrText.equals("in attachments"))
+            listOfUploadedFiles = streamPage.getNewestPostFiles();
+        else if (inAttachmentsOrText.equals("in text"))
+            listOfUploadedFiles = streamPage.getUploadedFilesInNewestPostText();
+        else
+            throw new IllegalArgumentException();
+
+        Assert.assertEquals(filesQuantity, listOfUploadedFiles.size());
     }
 }
