@@ -65,7 +65,6 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
       | .png  |
       | .docx |
 
-
     Scenario: Verify that user can upload multiple files simultaneously (.pdf, .txt, .jpeg, .png, .docx.)
               #loading files simultaneously
 
@@ -100,7 +99,6 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
       Then user see feed-post with 200 uploaded .txt files "in attachments"
       And user see feed-post with 200 uploaded .txt files "in text"
 
-
   Scenario: Upload 200 .txt files (20 files is the limit)
               #this is wrong scenario because it should fail if quantity of uploaded files > n
               #loading files simultaneously
@@ -111,6 +109,3 @@ Feature: US B31G1-168: As a user, I should be able to upload files and pictures 
     Then user see "upload_or_drag_file" button is visible
     When user upload 200 .txt files
     Then user see error message with 20 files as limit for upload instead of 200 attached .txt files
-
-
-

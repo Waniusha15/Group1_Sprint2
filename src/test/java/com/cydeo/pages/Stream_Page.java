@@ -290,4 +290,4 @@ public class Stream_Page {
     public WebElement getAppreciationButton() {
         return appreciationButton;
     }
-}
+

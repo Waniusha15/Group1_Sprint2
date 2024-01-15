@@ -294,7 +294,6 @@ public class UploadAsMessage_StepDefinitions {
 
         Assert.assertEquals(filesQuantity, listOfUploadedFiles.size());
     }
-
     //this test should be overwritten when upload will be limited
     @Then("user see error message with {int} files as limit for upload instead of {int} attached .txt files")
     public void userSeeErrorMessageWithFilesAsLimitForUploadInsteadOfAttachedTxtFiles(int filesUploadLimit, int filesQuantity) {
@@ -307,4 +306,3 @@ public class UploadAsMessage_StepDefinitions {
         Assert.assertTrue("File uploaded: " + uploadedFiles + ", Limit: " + filesUploadLimit,
                             uploadedFiles <= filesUploadLimit);
     }
-}

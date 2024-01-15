@@ -1,5 +1,6 @@
 package com.cydeo.pages;
 
+import com.cydeo.utilities.ConfigurationReader;
 import com.cydeo.utilities.Driver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -21,4 +22,10 @@ public class Login_Page {
     public WebElement rememberMe_text;
     @FindBy(id = "USER_REMEMBER")
     public WebElement rememberMe_checkbox;
+
+    public void login(String userType){
+        loginInput.sendKeys(ConfigurationReader.getProperty(userType+"Login"));
+        passwordInput.sendKeys(ConfigurationReader.getProperty(userType+"Password"));
+        loginButton.click();
+    }
 }
