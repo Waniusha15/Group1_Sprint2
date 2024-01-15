@@ -22,19 +22,7 @@ public class Login_StepDefinitions {
     }
     @When("user is logs in as {string}")
     public void user_is_logs_in_as(String userType) {
-        if(userType.equals("hr")){
-            loginPage.loginInput.sendKeys(ConfigurationReader.getProperty("hrLogin"));
-            loginPage.passwordInput.sendKeys(ConfigurationReader.getProperty("hrPassword"));
-            loginPage.loginButton.click();
-        } else if (userType.equals("helpdesk")) {
-            loginPage.loginInput.sendKeys(ConfigurationReader.getProperty("helpdeskLogin"));
-            loginPage.passwordInput.sendKeys(ConfigurationReader.getProperty("helpdeskPassword"));
-            loginPage.loginButton.click();
-        }else{
-            loginPage.loginInput.sendKeys(ConfigurationReader.getProperty("marketingLogin"));
-            loginPage.passwordInput.sendKeys(ConfigurationReader.getProperty("marketingPassword"));
-            loginPage.loginButton.click();
-        }
+       loginPage.login(userType);
     }
     @Then("user should land on Home page with {string} in title")
     public void user_should_land_on_home_page_with_in_title(String keyWordInTitle) {
@@ -66,6 +54,6 @@ public class Login_StepDefinitions {
     @Then("password should be masked by default")
     public void password_should_be_masked_by_default() {
         String attributeValue = loginPage.passwordInput.getAttribute("type");
-        Assert.assertTrue(attributeValue.equals("password"));
+        Assert.assertEquals("password", attributeValue);
     }
 }
