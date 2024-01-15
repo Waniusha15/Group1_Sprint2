@@ -131,6 +131,10 @@ public class UploadAsMessage_StepDefinitions {
                 isInText = false;
         }
 
+        //inserting file in text causing background processes, sleep to ensure they will be finished.
+        //otherwise unexpected text can appear in new message text and will cause uploading of file from previous post
+        BrowserUtils.sleep(4);
+
         Assert.assertTrue(isInText);
     }
 
@@ -289,5 +293,18 @@ public class UploadAsMessage_StepDefinitions {
             throw new IllegalArgumentException();
 
         Assert.assertEquals(filesQuantity, listOfUploadedFiles.size());
+    }
+
+    //this test should be overwritten when upload will be limited
+    @Then("user see error message with {int} files as limit for upload instead of {int} attached .txt files")
+    public void userSeeErrorMessageWithFilesAsLimitForUploadInsteadOfAttachedTxtFiles(int filesUploadLimit, int filesQuantity) {
+        var streamPage = new Stream_Page();
+        WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(60));
+
+        wait.until(ExpectedConditions.numberOfElementsToBe(streamPage.getUploadedFilesStatusLocator(), filesQuantity));
+
+        int uploadedFiles = streamPage.getUploadedFilesStatus().size();
+        Assert.assertTrue("File uploaded: " + uploadedFiles + ", Limit: " + filesUploadLimit,
+                            uploadedFiles <= filesUploadLimit);
     }
 }
