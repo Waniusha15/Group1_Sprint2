@@ -28,12 +28,7 @@ public class Stream_Page {
     By uploadOrDragFileInputLocator = By.xpath("//div[@style='display: block; opacity: 1;']//input[@multiple='multiple']");
 
     private WebElement locateUploadOrDragFileInput() {
-        /*WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.presenceOfElementLocated(uploadOrDragFileInputLocator));
-        JavascriptExecutor js = (JavascriptExecutor) Driver.getDriver();*/
-
         return Driver.getDriver().findElement(uploadOrDragFileInputLocator);
-        /*js.executeScript("arguments[0].scrollIntoView();", uploadOrDragFileInput);*/
     }
 
     @FindBy(id = "blog-submit-button-save")
@@ -83,6 +78,12 @@ public class Stream_Page {
     @FindBy(xpath = "(//div[@class='feed-post-text-block-inner-inner'])[1]//div//img")
     private List<WebElement> uploadedImagesInNewestPostText;
 
+    @FindBy(id = "feed-add-post-form-link-text")
+    private WebElement moreButton;
+
+    @FindBy(xpath = "//div[@id='popup-window-content-menu-popup-feed-add-post-form-popup']//span[contains(text(), 'Appreciation')]")
+    private WebElement appreciationButton;
+
     public WebElement getButton(String button) {
         if (button.equals("message"))
             return messageWindowButton;
@@ -94,6 +95,10 @@ public class Stream_Page {
             return uploadOrDragFileInput;
         else if (button.equals("delete_uploaded_file"))
             return deleteUploadedFileButton;
+        else if (button.equals("more"))
+            return moreButton;
+        else if (button.equals("appreciation"))
+            return appreciationButton;
         else
             throw new IllegalArgumentException();
     }
@@ -277,4 +282,12 @@ public class Stream_Page {
         path = path.substring(0, path.length()-1);
         uploadOrDragFileInput.sendKeys(path);
     }
-}
+
+    public WebElement getMoreButton() {
+        return moreButton;
+    }
+
+    public WebElement getAppreciationButton() {
+        return appreciationButton;
+    }
+

@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
                 "me.jvt.cucumber.report.PrettyReports:target/cucumber",
                 //"json:target/cucumber.json"
 
-
         },
         features = "src/test/resources/features",
         glue = "com/cydeo/step_definitions",
